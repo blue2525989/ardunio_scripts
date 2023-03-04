@@ -5,6 +5,7 @@
  String RC = "RIGHT_CLICK\n";
  String LC = "LEFT_CLICK\n";
  String RELEASE = "RELEASE|";
+ String PRESS = "PRESS|";
 
  const int F7_BUTTON = 9;
  const int F8_BUTTON = 8;
@@ -26,67 +27,32 @@ void setup() {
   // initialize mouse and keyboard control:
   Mouse.begin();
   Keyboard.begin();
-  // setup physical buttons
-  pinMode(F7_BUTTON, INPUT);
-  pinMode(F8_BUTTON, INPUT);
-  pinMode(F9_BUTTON, INPUT);
-  pinMode(F10_BUTTON, INPUT);
-  pinMode(F11_BUTTON, INPUT);
-  pinMode(F12_BUTTON, INPUT);
 }
 
-void keyPress(int keyVal) {
+void keyPress(int keyVal, int holdWasFound) {
     Keyboard.press(keyVal);
-    Keyboard.release(keyVal);
+    if (holdWasFound == 0) {
+      Keyboard.release(keyVal);
+    }
 }
 
 void loop() {
-  // delay(1);
 
 
-  // F7_BUTTON_STATE = digitalRead(F7_BUTTON);
-  // F8_BUTTON_STATE = digitalRead(F8_BUTTON);
-  // F9_BUTTON_STATE = digitalRead(F9_BUTTON);
-  // F10_BUTTON_STATE = digitalRead(F10_BUTTON);
-  // F11_BUTTON_STATE = digitalRead(F11_BUTTON);
-  // F12_BUTTON_STATE = digitalRead(F12_BUTTON);
-  // Serial.println(F7_BUTTON_STATE);
-  // Serial.println(F8_BUTTON_STATE);
-  // Serial.println(F9_BUTTON_STATE);
-  // Serial.println(F10_BUTTON_STATE);
-  // Serial.println(F11_BUTTON_STATE);
-  // Serial.println(F12_BUTTON_STATE);
-  // Serial.println();
-  // if (F7_BUTTON_STATE == LOW ) {
-  //   Serial.println("f7");
-  //   // keyPress(KEY_F7);
-  // }
-  // if (F8_BUTTON_STATE == LOW) {
-  //   Serial.println("f8");
-  //   // keyPress(KEY_F8);
-  // }
-  // if (F9_BUTTON_STATE == LOW) {
-  //   Serial.println("f9");
-  //   // keyPress(KEY_F9);
-  // }
-  // if (F10_BUTTON_STATE == LOW) {
-  //   Serial.println("f10");
-  //   // keyPress(KEY_F10);
-  // }
-  // if (F11_BUTTON_STATE == LOW) {
-  //   Serial.println("f11");
-  //   // keyPress(KEY_F11);
-  // }
-  // if (F12_BUTTON_STATE == LOW) {
-  //   Serial.println("f12");
-  //   // keyPress(KEY_F12);
-  // }
   if (Serial.available() > 0) {
 
-    const String inputStr = Serial.readStringUntil("\n");
+    int holdWasFound = 0;
+    String inputStr = Serial.readStringUntil("\n");
     if (inputStr != NULL) {
       Serial.print("Incoming string-> ");
       Serial.println(inputStr);
+      if (inputStr.indexOf(PRESS) != -1) {
+        holdWasFound = 1;
+        Serial.println("PRESS found");
+        inputStr = inputStr.substring(inputStr.indexOf("|") +1, inputStr.length());
+        Serial.println(inputStr);
+      }
+
       // check mouse coordinates first
       if (inputStr.indexOf(",") != -1) 
       {
@@ -97,98 +63,107 @@ void loop() {
         Mouse.move(x.toInt(), y.toInt());
       } 
       // right click
-      else if(inputStr == RC) {
+      else if(inputStr == RC || inputStr == "right") {
         Mouse.press(MOUSE_RIGHT);
-        Mouse.release();
+        if (holdWasFound == 0) {
+          Mouse.release();
+        }
       } 
-      // left click
-      else if(inputStr == LC) {
+      //left click
+      else if(inputStr == LC || inputStr == "left") {
         Mouse.press(MOUSE_LEFT);
+        if (holdWasFound == 0) {
+          Mouse.release();
+        }
+      }  
+      // release left click
+      else if(inputStr.indexOf(RELEASE) != -1) {
         Mouse.release();
-      } 
+        Keyboard.releaseAll();
+      }  
       // keyboard input
       else {
         Serial.println(inputStr);
         if (inputStr == "a\n") {
-          keyPress(97);
+          keyPress(97, holdWasFound);
         }
         else if (inputStr == "b\n") {
-          keyPress(98);
+          keyPress(98, holdWasFound);
         }
         else if (inputStr == "c\n") {
-          keyPress(99);
+          keyPress(99, holdWasFound);
         }
         else if (inputStr == "e\n") {
-          keyPress(101);
+          keyPress(101, holdWasFound);
         }
         else if (inputStr == "i\n") {
-          keyPress(105);
+          keyPress(105, holdWasFound);
         }
         else if (inputStr == "k\n") {
-          keyPress(107);
+          keyPress(107, holdWasFound);
         }
         else if (inputStr == "1\n") {
-          keyPress(49);
+          keyPress(49, holdWasFound);
         }
         else if (inputStr == "2\n") {
-          keyPress(50);
+          keyPress(50, holdWasFound);
         }
         else if (inputStr == "3\n") {
-          keyPress(51);
+          keyPress(51, holdWasFound);
         }
         else if (inputStr == "4\n") {
-          keyPress(52);
+          keyPress(52, holdWasFound);
         }
         else if (inputStr == "capslock\n") {
-          keyPress(KEY_CAPS_LOCK);
+          keyPress(KEY_CAPS_LOCK, holdWasFound);
         }
         else if (inputStr == "tab\n") {
-          keyPress(KEY_TAB);
+          keyPress(KEY_TAB, holdWasFound);
         }
         else if (inputStr == "w\n") {
-          keyPress(119);
+          keyPress(119, holdWasFound);
         }
-        else if (inputStr == "ESC\n") {
-          keyPress(KEY_ESC);
+        else if (inputStr == "esc\n") {
+          keyPress(KEY_ESC, holdWasFound);
         }
         else if (inputStr == "~\n") {
-          keyPress(126);
+          keyPress(126, holdWasFound);
         }
-        else if (inputStr == "F1\n") {
-          keyPress(KEY_F1);
+        else if (inputStr == "f1\n") {
+          keyPress(KEY_F1, holdWasFound);
         }
-        else if (inputStr == "F2\n") {
-          keyPress(KEY_F2);
+        else if (inputStr == "f2\n") {
+          keyPress(KEY_F2, holdWasFound);
         }
-        else if (inputStr == "F3\n") {
-          keyPress(KEY_F3);
+        else if (inputStr == "f3\n") {
+          keyPress(KEY_F3, holdWasFound);
         }
-        else if (inputStr == "F4\n") {
-          keyPress(KEY_F4);
+        else if (inputStr == "f4\n") {
+          keyPress(KEY_F4, holdWasFound);
         }
-        else if (inputStr == "F5\n") {
-          keyPress(KEY_F5);
+        else if (inputStr == "f5\n") {
+          keyPress(KEY_F5, holdWasFound);
         }
-        else if (inputStr == "F6\n") {
-          keyPress(KEY_F6);
+        else if (inputStr == "f6\n") {
+          keyPress(KEY_F6, holdWasFound);
         }
-        else if (inputStr == "F7\n") {
-          keyPress(KEY_F7);
+        else if (inputStr == "f7\n") {
+          keyPress(KEY_F7, holdWasFound);
         }
-        else if (inputStr == "F8\n") {
-          keyPress(KEY_F8);
+        else if (inputStr == "f8\n") {
+          keyPress(KEY_F8, holdWasFound);
         }
-        else if (inputStr == "F9\n") {
-          keyPress(KEY_F9);
+        else if (inputStr == "f9\n") {
+          keyPress(KEY_F9, holdWasFound);
         }
-        else if (inputStr == "F10\n") {
-          keyPress(KEY_F10);
+        else if (inputStr == "f10\n") {
+          keyPress(KEY_F10, holdWasFound);
         }
-        else if (inputStr == "F11\n") {
-          keyPress(KEY_F11);
+        else if (inputStr == "f11\n") {
+          keyPress(KEY_F11, holdWasFound);
         }
-        else if (inputStr == "F12\n") {
-          keyPress(KEY_F12);
+        else if (inputStr == "f12\n") {
+          keyPress(KEY_F12, holdWasFound);
         }
       }
     }
